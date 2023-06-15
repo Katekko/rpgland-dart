@@ -191,7 +191,7 @@ class TranslationEn extends CommandTranslations {
     );
 
     profileCommands = ProfileCommands(
-      profile: (PlayerModel player) {
+      info: (PlayerModel player) {
         final progressBarLength = 10;
         final filledBarCount =
             (player.exp / player.getExpNeededForNextLevel()).floor() *

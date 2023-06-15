@@ -1,5 +1,6 @@
 import 'common/both/ping.command.dart';
 import 'rpg/both/help.command.dart';
+import 'rpg/both/profile.command.dart';
 import 'rpg/private/start.command.dart';
 
 typedef CommandMap = Map<String, dynamic>;
@@ -9,7 +10,7 @@ final commands = <String, dynamic>{
   'ping': () => PingCommand(),
   'help': () => HelpCommand(),
   'start': () => StartCommand(),
-  // 'profile': ProfileCommand(),
+  'profile': () => ProfileCommand(),
   // 'hunt': HuntCommand(),
   // 'hunt attack': HuntAttackCommand(),
   // 'shop info': ShopCommand(),

@@ -96,8 +96,8 @@ class HuntAttackCommands {
 }
 
 class ProfileCommands {
-  final Function(PlayerModel) profile;
-  ProfileCommands({required this.profile});
+  final Function(PlayerModel) info;
+  ProfileCommands({required this.info});
 }
 
 class ShopCommands {
