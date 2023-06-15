@@ -1,213 +1,216 @@
-// class CustomMessage {
-//   int timestamp;
-//   String phone;
-//   String name;
-//   String body;
-//   void Function(String message) reply;
-//   bool isGroup;
+import 'commands/commands.dart';
+import 'core/data/services/players.service.dart';
+import 'core/domain/abstractions/commands/command.dart';
+import 'core/domain/models/custom_message.model.dart';
+import 'core/domain/models/player.model.dart';
+import 'core/i18n/en.dart';
+import 'core/i18n/pt_br.dart';
+import 'core/i18n/translation.dart';
 
-//   CustomMessage({
-//     required this.timestamp,
-//     required this.phone,
-//     required this.body,
-//     required this.reply,
-//     required this.name,
-//     required this.isGroup,
-//   });
-// }
+class HandleMessages {
+  CustomMessage message;
+  String commandChar;
+  PlayersService playersService;
+  // CommonsService commonsService;
+  // MobsService mobsService;
+  // ItemsService itemsService;
 
-// class HandleMessages {
-//   CustomMessage message;
-//   String commandChar;
-//   PlayersService playersService;
-//   CommonsService commonsService;
-//   MobsService mobsService;
-//   ItemsService itemsService;
+  Map<String, int> cooldowns = {};
 
-//   Map<String, int> cooldowns = {};
+  HandleMessages({
+    required this.message,
+    required this.commandChar,
+    required this.playersService,
+    // required this.commonsService,
+    // required this.mobsService,
+    // required this.itemsService,
+  });
 
-//   HandleMessages({
-//     required this.message,
-//     required this.commandChar,
-//     required this.playersService,
-//     required this.commonsService,
-//     required this.mobsService,
-//     required this.itemsService,
-//   });
+  bool verifyIfNeedToIgnore() {
+    final oneMinute = 60 * 1000;
 
-//   bool verifyIfNeedToIgnore() {
-//     final oneMinute = 60 * 1000;
+    final messageTimestamp = message.timestamp;
+    final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+    final messageDate = DateTime.fromMillisecondsSinceEpoch(
+      messageTimestamp * 1000,
+    );
 
-//     final messageTimestamp = message.timestamp;
-//     final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-//     final messageDate = DateTime.fromMillisecondsSinceEpoch(
-//       messageTimestamp * 1000,
-//     );
+    return currentTimestamp - messageDate.millisecondsSinceEpoch > oneMinute;
+  }
 
-//     return currentTimestamp - messageDate.millisecondsSinceEpoch > oneMinute;
-//   }
+  bool verifyIfIsCommand() {
+    return message.body.startsWith(commandChar);
+  }
 
-//   bool verifyIfIsCommand() {
-//     return message.body.startsWith(commandChar);
-//   }
+  Future<CommandTranslations> defineLanguage(PlayerModel? player) async {
+    final ptBR = TranslationPtBr(commandChar);
+    final en = TranslationEn(commandChar);
+    if (player != null) {
+      final lang = player.language;
+      return lang == 'pt_BR' ? ptBR : en;
+    } else {
+      return (message.phone?.startsWith('55') ?? true) ? ptBR : en;
+    }
+  }
 
-//   Future<CommandTranslations> defineLanguage(PlayerModel? player) async {
-//     final ptBR = TranslationPtBr(commandChar);
-//     final en = TranslationEn(commandChar);
-//     if (player != null) {
-//       final lang = player.language;
-//       return lang == 'pt_BR' ? ptBR : en;
-//     } else {
-//       return message.phone.startsWith('55') ? ptBR : en;
-//     }
-//   }
+  bool verifyIfIsFlood(int currentTime, int cooldownDuration) {
+    final lastMessageTime = cooldowns[message.phone] ?? 0;
+    final timeDifference = currentTime - lastMessageTime;
+    return timeDifference < cooldownDuration;
+  }
 
-//   bool verifyIfIsFlood(int currentTime, int cooldownDuration) {
-//     final lastMessageTime = cooldowns[message.phone] ?? 0;
-//     final timeDifference = currentTime - lastMessageTime;
-//     return timeDifference < cooldownDuration;
-//   }
+  // Future<void> validateWhitelist(CommandTranslations i18n) async {
+  //   final commonsService = this.commonsService;
+  //   final whitelist = await commonsService.getWhitelist();
+  //   final phone = message.phone;
+  //   final name = message.name;
 
-//   Future<void> validateWhitelist(CommandTranslations i18n) async {
-//     final commonsService = this.commonsService;
-//     final whitelist = await commonsService.getWhitelist();
-//     final phone = message.phone;
-//     final name = message.name;
+  //   try {
+  //     final foundNumber = whitelist.firstWhere((item) => item.number == phone,
+  //         orElse: () => null);
+  //     if (foundNumber == null) {
+  //       throw NotAllowedException();
+  //     } else if (!foundNumber.allow) {
+  //       throw BotInMaintenanceException();
+  //     }
+  //   } catch (err) {
+  //     if (err is NotAllowedException) {
+  //       print('[RPG LAND] Not Authorized: $name | $phone');
+  //       message.reply(i18n.commands.commons.notAuthorized);
+  //     } else if (err is BotInMaintenanceException) {
+  //       message.reply(i18n.commands.commons.botMaintenance);
+  //       print('[RPG LAND] Bot in Maintenance: $name | $phone');
+  //     } else {
+  //       print(err);
+  //       message.reply(i18n.commands.commons.somethingWrong);
+  //     }
 
-//     try {
-//       final foundNumber = whitelist.firstWhere((item) => item.number == phone,
-//           orElse: () => null);
-//       if (foundNumber == null) {
-//         throw NotAllowedException();
-//       } else if (!foundNumber.allow) {
-//         throw BotInMaintenanceException();
-//       }
-//     } catch (err) {
-//       if (err is NotAllowedException) {
-//         print('[RPG LAND] Not Authorized: $name | $phone');
-//         message.reply(i18n.commands.commons.notAuthorized);
-//       } else if (err is BotInMaintenanceException) {
-//         message.reply(i18n.commands.commons.botMaintenance);
-//         print('[RPG LAND] Bot in Maintenance: $name | $phone');
-//       } else {
-//         print(err);
-//         message.reply(i18n.commands.commons.somethingWrong);
-//       }
+  //     throw err;
+  //   }
+  // }
 
-//       throw err;
-//     }
-//   }
+  Command? findCommand(String commandLine, CommandTranslations i18n) {
+    try {
+      final List<String> commandParts = commandLine.split(' ');
+      return _traverseCommands(commands, commandParts, i18n);
+    } catch (error) {
+      // Handle the error if necessary
+      message.reply(i18n.commands['commons']['commandNotFound']);
+      return null;
+    }
+  }
 
-//   Command? findCommand(String commandLine, CommandTranslations i18n,
-//       [CommandMap? currentCommands]) {
-//     try {
-//       final commandParts = commandLine.split(' ');
-//       currentCommands ??= commands;
+  Command? _traverseCommands(
+    dynamic commands,
+    List<String> commandParts,
+    CommandTranslations i18n,
+  ) {
+    if (commandParts.isEmpty) {
+      if (commands is Command) {
+        return commands;
+      } else {
+        // Command not found, handle it
+        message.reply(i18n.commands['commons']['commandNotFound']);
+        return null;
+      }
+    }
 
-//       for (final command in commandParts) {
-//         if (currentCommands is Command) {
-//           return currentCommands;
-//         }
+    final commandPart = commandParts.first;
+    final remainingCommandParts = commandParts.sublist(1);
 
-//         if (!currentCommands.containsKey(command)) {
-//           throw Error();
-//         }
+    if (commands is CommandMap && commands.containsKey(commandPart)) {
+      final nestedCommand = commands[commandPart];
+      return _traverseCommands(nestedCommand, remainingCommandParts, i18n);
+    } else {
+      // Command not found, handle it
+      message.reply(i18n.commands['commons']['commandNotFound']);
+      return null;
+    }
+  }
 
-//         currentCommands = currentCommands[command] as CommandMap?;
-//       }
+  List<String> findArguments(String commandLine) {
+    final List<String> commandParts = commandLine.split(' ');
+    commandParts.removeAt(0); // Remove the first part (command)
 
-//       if (currentCommands is Command) {
-//         return currentCommands;
-//       }
+    final List<String> arguments = [];
 
-//       throw Error();
-//     } catch (error) {
-//       message.reply(i18n.commands.commons.commandNotFound);
-//       return null;
-//     }
-//   }
+    for (final part in commandParts) {
+      if (arguments.isEmpty || part.startsWith('-')) {
+        arguments.add(part); // Add arguments or subcommands that start with '-'
+      } else {
+        final lastArgumentIndex = arguments.length - 1;
+        arguments[lastArgumentIndex] +=
+            ' $part'; // Combine non-dashed parts with the last argument
+      }
+    }
 
-//   List<String> findArguments(String commandLine) {
-//     final commandParts = commandLine.split(' ');
-//     final args = <String>[];
+    return arguments;
+  }
 
-//     CommandMap? currentCommand = commands;
+  bool commandOnlyForPrivate(CommandTranslations i18n, Command command) {
+    if (message.isGroup) {
+      final commandType = command.runtimeType;
+      if (privateCommands.contains(commandType)) {
+        message.reply(i18n.commands['commons']['commandOnlyForPrivate']);
+        return true;
+      }
+    }
 
-//     for (var i = 0; i < commandParts.length; i++) {
-//       final commandPart = commandParts[i];
+    return false;
+  }
 
-//       if (currentCommand is Map && currentCommand.containsKey(commandPart)) {
-//         currentCommand = currentCommand[commandPart] as CommandMap?;
-//       } else {
-//         args.add(commandPart);
-//       }
-//     }
+  bool commandNeedToStart(
+    CommandTranslations i18n,
+    Command command,
+    PlayerModel? player,
+  ) {
+    final commandType = command.runtimeType;
+    if (needToStartCommands.contains(commandType) && player == null) {
+      message.reply(i18n.commands['commons']['needToStart']);
+      return true;
+    }
 
-//     return args;
-//   }
+    return false;
+  }
 
-//   bool commandOnlyForPrivate(CommandTranslations i18n, Command command) {
-//     if (message.isGroup) {
-//       final commandType = command.runtimeType;
-//       if (privateCommands.contains(commandType)) {
-//         message.reply(i18n.commands.commons.commandOnlyForPrivate);
-//         return true;
-//       }
-//     }
+  Future<void> handle() async {
+    try {
+      if (verifyIfNeedToIgnore()) return;
+      if (!verifyIfIsCommand()) return;
+      final player = await playersService.getPlayerByMessage(message);
+      final i18n = await defineLanguage(player);
 
-//     return false;
-//   }
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      final isFlood = verifyIfIsFlood(currentTime, 1000);
+      if (isFlood) {
+        message.reply(i18n.commands['commons']['waitMessage']);
+        return;
+      }
 
-//   bool commandNeedToStart(
-//       CommandTranslations i18n, Command command, PlayerModel? player) {
-//     final commandType = command.runtimeType;
-//     if (needToStartCommands.contains(commandType) && player == null) {
-//       message.reply(i18n.commands.commons.needToStart);
-//       return true;
-//     }
+      // await validateWhitelist(i18n);
 
-//     return false;
-//   }
+      final commandLine = message.body.split(commandChar)[1];
+      final command = findCommand(commandLine, i18n);
+      if (command == null) return;
+      if (commandOnlyForPrivate(i18n, command)) return;
+      if (commandNeedToStart(i18n, command, player)) return;
 
-//   Future<void> handle() async {
-//     try {
-//       if (verifyIfNeedToIgnore()) return;
-//       if (!verifyIfIsCommand()) return;
-//       final player = await playersService.getPlayerByMessage(message);
-//       final i18n = await defineLanguage(player);
+      final args = findArguments(commandLine);
 
-//       final currentTime = DateTime.now().millisecondsSinceEpoch;
-//       final isFlood = verifyIfIsFlood(currentTime, 1000);
-//       if (isFlood) {
-//         message.reply(i18n.commands.commons.waitMessage);
-//         return;
-//       }
+      command.injectDependencies(
+        i18n,
+        player,
+        {'playersService': playersService},
+      );
 
-//       await validateWhitelist(i18n);
+      await command.execute(message, args);
 
-//       final commandLine = message.body.split(commandChar)[1];
-//       final command = findCommand(commandLine, i18n);
-//       if (command == null) return null;
-//       if (commandOnlyForPrivate(i18n, command)) return;
-//       if (commandNeedToStart(i18n, command, player)) return;
+      print('[RPG LAND] ${message.name} ${message.body}');
 
-//       final args = findArguments(commandLine);
-
-//       command.injectDependencies(
-//         i18n,
-//         player,
-//         PlayersService: playersService,
-//         CommonsService: commonsService,
-//         MobsService: mobsService,
-//         ItemsService: itemsService,
-//       );
-//       command.execute(message, args);
-
-//       print('[RPG LAND] ${message.name} ${message.body}');
-
-//       cooldowns[message.phone] = currentTime;
-//     } catch (err) {
-//       print('[RPG LAND] $err');
-//     }
-//   }
-// }
+      // TODO: Fix cooldowns
+      // cooldowns[message.phone] = currentTime;
+    } catch (err) {
+      print('[RPG LAND] $err');
+    }
+  }
+}

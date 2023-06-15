@@ -31,10 +31,31 @@ class PlayersService extends Service {
     }
   }
 
+  Future<PlayerModel?> _getPlayerByTelegramId(String phone) async {
+    try {
+      final player = await store.getBy<PlayerData>('telegramId', phone);
+
+      if (player != null) {
+        final model = PlayerModel.fromData(player);
+        return model;
+      }
+
+      return null;
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   Future<PlayerModel?> getPlayerByMessage(CustomMessage message) async {
     try {
       final phone = message.phone;
-      return _getPlayerByPhone(phone);
+      if (phone != null) {
+        return _getPlayerByPhone(phone);
+      } else if (message.telegramId != null) {
+        return _getPlayerByTelegramId(message.telegramId!);
+      }
+
+      return null;
     } catch (err) {
       rethrow;
     }

@@ -9,6 +9,7 @@ part 'player.data.g.dart';
 
 @JsonSerializable()
 class PlayerData extends DataModel {
+  // final String telegramId;
   final String name;
   final String telephoneNumber;
   final List<ItemData> inventory;
@@ -21,6 +22,7 @@ class PlayerData extends DataModel {
 
   PlayerData({
     required super.id,
+    // required this.telegramId,
     required this.name,
     required this.inventory,
     required this.telephoneNumber,

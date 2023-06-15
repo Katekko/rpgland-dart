@@ -1,7 +1,9 @@
+import 'package:rpgland/handle_messages.dart';
 import 'package:teledart/model.dart';
 import 'package:teledart/teledart.dart';
 import 'package:teledart/telegram.dart';
 import '../core/data/services/players.service.dart';
+import '../core/domain/models/custom_message.model.dart';
 import '../core/domain/models/player.model.dart';
 import '../core/injector.dart';
 import '../dotenv.dart';
@@ -55,6 +57,27 @@ class TelegramPlatform extends BasePlatform {
         await playersService.savePlayer(player);
         return;
       }
+    });
+
+    teledart.onCommand().listen((msg) async {
+      final customMessage = CustomMessage(
+        body: msg.text ?? '',
+        telegramId: msg.from?.id.toString(),
+        timestamp: msg.date,
+        isGroup: msg.chat.type == Chat.typeGroup,
+        name: msg.chat.firstName ?? '',
+        reply: msg.reply,
+      );
+
+      final playersService = Injector.find<PlayersService>();
+
+      final handler = HandleMessages(
+        message: customMessage,
+        commandChar: '/',
+        playersService: playersService,
+      );
+
+      handler.handle();
     });
 
     print('[RPG LAND] Telegram platform initiated!');
