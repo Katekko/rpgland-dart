@@ -8,6 +8,7 @@ part of 'player.data.dart';
 
 PlayerData _$PlayerDataFromJson(Map<String, dynamic> json) => PlayerData(
       id: json['id'] as String,
+      telegramId: json['telegramId'] as String?,
       name: json['name'] as String,
       inventory: (json['inventory'] as List<dynamic>)
           .map((e) => ItemData.fromJson(e as Map<String, dynamic>))
@@ -26,6 +27,7 @@ PlayerData _$PlayerDataFromJson(Map<String, dynamic> json) => PlayerData(
 Map<String, dynamic> _$PlayerDataToJson(PlayerData instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'telegramId': instance.telegramId,
       'name': instance.name,
       'telephoneNumber': instance.telephoneNumber,
       'inventory': instance.inventory,

@@ -7,11 +7,17 @@ abstract class Store {
 
   Store({required this.collection});
 
-  Future<List<T>> getAll<T extends DataModel>();
+  Future<List<T>> getAll<T extends DataModel>({
+    required T Function(Map<String, dynamic>) mapper,
+  });
 
   Future<void> save<T extends DataModel>(T data);
 
-  Future<T?> getBy<T extends DataModel>(String field, dynamic value);
+  Future<T?> getBy<T extends DataModel>({
+    required String field,
+    required value,
+    required T Function(Map<String, dynamic>) mapper,
+  });
 
   Future<void> saveAll(List<DataModel> data);
 }

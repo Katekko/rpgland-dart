@@ -94,8 +94,7 @@ class HandleMessages {
       final List<String> commandParts = commandLine.split(' ');
       return _traverseCommands(commands, commandParts, i18n);
     } catch (error) {
-      // Handle the error if necessary
-      message.reply(i18n.commands['commons']['commandNotFound']);
+      message.reply(i18n.commands.commons.commandNotFound);
       return null;
     }
   }
@@ -106,11 +105,10 @@ class HandleMessages {
     CommandTranslations i18n,
   ) {
     if (commandParts.isEmpty) {
-      if (commands is Command) {
-        return commands;
+      if (commands is Command Function()) {
+        return commands();
       } else {
-        // Command not found, handle it
-        message.reply(i18n.commands['commons']['commandNotFound']);
+        message.reply(i18n.commands.commons.commandNotFound);
         return null;
       }
     }
@@ -122,8 +120,7 @@ class HandleMessages {
       final nestedCommand = commands[commandPart];
       return _traverseCommands(nestedCommand, remainingCommandParts, i18n);
     } else {
-      // Command not found, handle it
-      message.reply(i18n.commands['commons']['commandNotFound']);
+      message.reply(i18n.commands.commons.commandNotFound);
       return null;
     }
   }
@@ -151,7 +148,7 @@ class HandleMessages {
     if (message.isGroup) {
       final commandType = command.runtimeType;
       if (privateCommands.contains(commandType)) {
-        message.reply(i18n.commands['commons']['commandOnlyForPrivate']);
+        message.reply(i18n.commands.commons.commandOnlyForPrivate);
         return true;
       }
     }
@@ -166,7 +163,7 @@ class HandleMessages {
   ) {
     final commandType = command.runtimeType;
     if (needToStartCommands.contains(commandType) && player == null) {
-      message.reply(i18n.commands['commons']['needToStart']);
+      message.reply(i18n.commands.commons.needToStart);
       return true;
     }
 
@@ -183,7 +180,7 @@ class HandleMessages {
       final currentTime = DateTime.now().millisecondsSinceEpoch;
       final isFlood = verifyIfIsFlood(currentTime, 1000);
       if (isFlood) {
-        message.reply(i18n.commands['commons']['waitMessage']);
+        message.reply(i18n.commands.commons.waitMessage);
         return;
       }
 

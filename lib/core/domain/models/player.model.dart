@@ -10,6 +10,7 @@ import 'mob.model.dart';
 
 class PlayerModel {
   final String id;
+  final String? telegramId;
   final String name;
   final String telephoneNumber;
   final List<ItemModel> inventory;
@@ -80,6 +81,7 @@ class PlayerModel {
     required this.id,
     required this.name,
     required this.telephoneNumber,
+    this.telegramId,
     int? health,
     this.level = 1,
     this.state = PlayerState.idle,
@@ -91,7 +93,11 @@ class PlayerModel {
     this.health = health ?? _baseHealth;
   }
 
-  static PlayerModel createNew(String name, String telephone) {
+  static PlayerModel createNew(
+    String name,
+    String telephone,
+    String? telegramId,
+  ) {
     telephone = telephone.replaceAll('+', '');
     final languagePtBr = telephone.startsWith('55');
 
@@ -100,6 +106,7 @@ class PlayerModel {
       name: name,
       telephoneNumber: telephone,
       language: languagePtBr ? 'pt_BR' : 'en',
+      telegramId: telegramId,
     );
 
     return player;
@@ -108,6 +115,7 @@ class PlayerModel {
   PlayerData toData() {
     final player = PlayerData(
       id: id,
+      telegramId: telegramId,
       name: name,
       telephoneNumber: telephoneNumber,
       health: health,
@@ -132,6 +140,7 @@ class PlayerModel {
       language: data.language,
       level: data.level,
       state: data.state,
+      telegramId: data.telegramId,
       inventory: data.inventory.map((e) => ItemModel.fromData(e)).toList(),
       huntAgainst: data.huntAgainst != null
           ? MobModel.fromData(data.huntAgainst!)

@@ -18,7 +18,7 @@ class PingCommand extends Command {
   @override
   Future<void> execute(CustomMessage message, dynamic args) async {
     if (message.name.toLowerCase() != 'katekko') {
-      message.reply(i18n.commands['commons']['youAreNotKatekko']);
+      message.reply(i18n.commands.commons.youAreNotKatekko);
     } else {
       message.reply('PONG PONG NO KATEKKO');
     }

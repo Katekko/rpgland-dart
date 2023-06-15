@@ -18,7 +18,11 @@ class PlayersService extends Service {
 
   Future<PlayerModel?> _getPlayerByPhone(String phone) async {
     try {
-      final player = await store.getBy<PlayerData>('telephoneNumber', phone);
+      final player = await store.getBy<PlayerData>(
+        field: 'telephoneNumber',
+        value: phone,
+        mapper: PlayerData.fromJson,
+      );
 
       if (player != null) {
         final model = PlayerModel.fromData(player);
@@ -31,9 +35,13 @@ class PlayersService extends Service {
     }
   }
 
-  Future<PlayerModel?> _getPlayerByTelegramId(String phone) async {
+  Future<PlayerModel?> _getPlayerByTelegramId(String id) async {
     try {
-      final player = await store.getBy<PlayerData>('telegramId', phone);
+      final player = await store.getBy<PlayerData>(
+        field: 'telegramId',
+        value: id,
+        mapper: PlayerData.fromJson,
+      );
 
       if (player != null) {
         final model = PlayerModel.fromData(player);
@@ -63,7 +71,9 @@ class PlayersService extends Service {
 
   Future<List<PlayerModel>> getAllPlayers() async {
     try {
-      final response = await store.getAll<PlayerData>();
+      final response = await store.getAll<PlayerData>(
+        mapper: PlayerData.fromJson,
+      );
       final models = response.map((e) => PlayerModel.fromData(e)).toList();
       return models;
     } catch (err) {

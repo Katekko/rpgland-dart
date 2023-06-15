@@ -1,3 +1,5 @@
+import 'package:teledart/model.dart';
+
 class CustomMessage {
   int timestamp;
 
@@ -18,4 +20,18 @@ class CustomMessage {
     this.telegramId,
     this.phone,
   });
+
+  factory CustomMessage.fromTelegramMessage(TeleDartMessage msg) {
+    final customMessage = CustomMessage(
+      body: msg.text ?? '',
+      telegramId: msg.from?.id.toString(),
+      timestamp: msg.date,
+      isGroup: msg.chat.type == Chat.typeGroup,
+      name: msg.chat.firstName ?? '',
+      reply: msg.reply,
+      phone: msg.contact?.phoneNumber.replaceAll('+', ''),
+    );
+
+    return customMessage;
+  }
 }

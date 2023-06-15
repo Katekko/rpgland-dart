@@ -1,12 +1,14 @@
 import 'common/both/ping.command.dart';
+import 'rpg/both/help.command.dart';
+import 'rpg/private/start.command.dart';
 
 typedef CommandMap = Map<String, dynamic>;
 
 /// All existent commands in the bot
 final commands = <String, dynamic>{
-  'ping': PingCommand(),
-  // 'help': HelpCommand(),
-  // 'start': StartCommand(),
+  'ping': () => PingCommand(),
+  'help': () => HelpCommand(),
+  'start': () => StartCommand(),
   // 'profile': ProfileCommand(),
   // 'hunt': HuntCommand(),
   // 'hunt attack': HuntAttackCommand(),

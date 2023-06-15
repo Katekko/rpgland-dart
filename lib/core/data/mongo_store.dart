@@ -7,10 +7,12 @@ class MongoStore extends Store {
   MongoStore({required super.collection, required this.db});
 
   @override
-  Future<List<T>> getAll<T extends DataModel>() async {
+  Future<List<T>> getAll<T extends DataModel>({
+    required T Function(Map<String, dynamic>) mapper,
+  }) async {
     final coll = db.collection(collection);
     final response = await coll.find().toList();
-    final items = response.map(DataModel.fromJson<T>).toList();
+    final items = response.map(mapper).toList();
     return items;
   }
 
@@ -21,11 +23,15 @@ class MongoStore extends Store {
   }
 
   @override
-  Future<T?> getBy<T extends DataModel>(String field, value) async {
+  Future<T?> getBy<T extends DataModel>({
+    required String field,
+    required value,
+    required T Function(Map<String, dynamic>) mapper,
+  }) async {
     final coll = db.collection(collection);
     final response = await coll.findOne(where.eq(field, value));
     if (response != null) {
-      final item = DataModel.fromJson<T>(response);
+      final item = mapper(response);
       return item;
     }
 

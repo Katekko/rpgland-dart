@@ -2,14 +2,31 @@ import 'package:rpgland/handle_messages.dart';
 import 'package:teledart/model.dart';
 import 'package:teledart/teledart.dart';
 import 'package:teledart/telegram.dart';
+import '../commands/rpg/private/start.command.dart';
 import '../core/data/services/players.service.dart';
 import '../core/domain/models/custom_message.model.dart';
 import '../core/domain/models/player.model.dart';
+import '../core/i18n/en.dart';
+import '../core/i18n/pt_br.dart';
+import '../core/i18n/translation.dart';
 import '../core/injector.dart';
 import '../dotenv.dart';
 import 'base_platform.dart';
 
 class TelegramPlatform extends BasePlatform {
+  void handleMessages(TeleDartMessage msg) async {
+    final playersService = Injector.find<PlayersService>();
+    final customMessage = CustomMessage.fromTelegramMessage(msg);
+
+    final handler = HandleMessages(
+      message: customMessage,
+      commandChar: '/',
+      playersService: playersService,
+    );
+
+    await handler.handle();
+  }
+
   @override
   Future<void> initiate() async {
     print('[RPG LAND] Initiating Telegram platform...');
@@ -25,6 +42,16 @@ class TelegramPlatform extends BasePlatform {
     teledart.start();
 
     teledart.onCommand('start').listen((msg) async {
+      final playersService = Injector.find<PlayersService>();
+      final customMessage = CustomMessage.fromTelegramMessage(msg);
+      final player = await playersService.getPlayerByMessage(customMessage);
+      final language = await defineLanguage(player, customMessage);
+
+      if (player != null) {
+        msg.reply(language.commands.start.playerAlreadyStarted);
+        return;
+      }
+
       var keyboard = ReplyKeyboardMarkup(
         resizeKeyboard: true,
         oneTimeKeyboard: true,
@@ -34,52 +61,47 @@ class TelegramPlatform extends BasePlatform {
       );
 
       msg.reply(
-        'Please share your contact information.',
+        language.commands.start.initiateOnTelegran,
         replyMarkup: keyboard,
       );
     });
 
-    teledart.onMessage().listen((message) async {
-      if (message.contact != null) {
+    teledart.onMessage().listen((msg) async {
+      final playersService = Injector.find<PlayersService>();
+      final customMessage = CustomMessage.fromTelegramMessage(msg);
+      final player = await playersService.getPlayerByMessage(customMessage);
+      final language = await defineLanguage(player, customMessage);
+
+      if (msg.contact != null) {
         final playersService = Injector.find<PlayersService>();
-        var contact = message.contact!;
 
-        message.reply(
-          'Thank you for sharing your contact information.',
-          replyMarkup: ReplyKeyboardRemove(removeKeyboard: true),
+        final command = StartCommand();
+        command.injectDependencies(
+          language,
+          player,
+          {'playersService': playersService},
         );
 
-        final player = PlayerModel.createNew(
-          contact.firstName,
-          contact.phoneNumber,
-        );
-
-        await playersService.savePlayer(player);
-        return;
+        await command.execute(customMessage, []);
       }
     });
 
-    teledart.onCommand().listen((msg) async {
-      final customMessage = CustomMessage(
-        body: msg.text ?? '',
-        telegramId: msg.from?.id.toString(),
-        timestamp: msg.date,
-        isGroup: msg.chat.type == Chat.typeGroup,
-        name: msg.chat.firstName ?? '',
-        reply: msg.reply,
-      );
-
-      final playersService = Injector.find<PlayersService>();
-
-      final handler = HandleMessages(
-        message: customMessage,
-        commandChar: '/',
-        playersService: playersService,
-      );
-
-      handler.handle();
-    });
+    teledart.onCommand().listen(handleMessages);
 
     print('[RPG LAND] Telegram platform initiated!');
+  }
+
+  Future<CommandTranslations> defineLanguage(
+    PlayerModel? player,
+    CustomMessage message,
+  ) async {
+    final ptBR = TranslationPtBr('/');
+    final en = TranslationEn('/');
+    if (player != null) {
+      final lang = player.language;
+      return lang == 'pt_BR' ? ptBR : en;
+    } else {
+      return (message.phone?.startsWith('55') ?? false) ? ptBR : en;
+    }
   }
 }
