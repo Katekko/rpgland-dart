@@ -1,0 +1,1 @@
+class NotAllowedException implements Exception {}

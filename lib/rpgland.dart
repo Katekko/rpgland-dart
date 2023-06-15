@@ -4,6 +4,7 @@ import 'package:rpgland/core/injector.dart';
 import 'package:rpgland/platforms/base_platform.dart';
 
 import 'core/data/mongo_store.dart';
+import 'core/data/services/commons.service.dart';
 import 'dotenv.dart';
 
 class RpgLand {
@@ -19,6 +20,10 @@ class RpgLand {
     final uri = dotenv['MONGO_DB_URI'];
     var db = await Db.create(uri!);
     await db.open();
+
+    final whitelistStore = MongoStore(collection: 'whitelist', db: db);
+    final commonsService = CommonsService(whitelistStore);
+    Injector.put<CommonsService>(commonsService);
 
     final playersStore = MongoStore(collection: 'players', db: db);
     final playersService = PlayersService(playersStore);

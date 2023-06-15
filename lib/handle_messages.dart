@@ -1,6 +1,10 @@
+import 'package:rpgland/core/data/services/commons.service.dart';
+import 'package:rpgland/core/injector.dart';
+
 import 'commands/commands.dart';
 import 'core/data/services/players.service.dart';
 import 'core/domain/abstractions/commands/command.dart';
+import 'core/domain/exceptions/not_allowed.exception.dart';
 import 'core/domain/models/custom_message.model.dart';
 import 'core/domain/models/player.model.dart';
 import 'core/i18n/en.dart';
@@ -59,35 +63,32 @@ class HandleMessages {
     return timeDifference < cooldownDuration;
   }
 
-  // Future<void> validateWhitelist(CommandTranslations i18n) async {
-  //   final commonsService = this.commonsService;
-  //   final whitelist = await commonsService.getWhitelist();
-  //   final phone = message.phone;
-  //   final name = message.name;
+  Future<void> validateWhitelist(CommandTranslations i18n) async {
+    final commonsService = Injector.find<CommonsService>();
+    final phone = message.phone;
+    final name = message.name;
 
-  //   try {
-  //     final foundNumber = whitelist.firstWhere((item) => item.number == phone,
-  //         orElse: () => null);
-  //     if (foundNumber == null) {
-  //       throw NotAllowedException();
-  //     } else if (!foundNumber.allow) {
-  //       throw BotInMaintenanceException();
-  //     }
-  //   } catch (err) {
-  //     if (err is NotAllowedException) {
-  //       print('[RPG LAND] Not Authorized: $name | $phone');
-  //       message.reply(i18n.commands.commons.notAuthorized);
-  //     } else if (err is BotInMaintenanceException) {
-  //       message.reply(i18n.commands.commons.botMaintenance);
-  //       print('[RPG LAND] Bot in Maintenance: $name | $phone');
-  //     } else {
-  //       print(err);
-  //       message.reply(i18n.commands.commons.somethingWrong);
-  //     }
+    final allowed = await commonsService.checkIfIsAllowed(
+      phone,
+      message.telegramId,
+    );
 
-  //     throw err;
-  //   }
-  // }
+    try {
+      if (!allowed) {
+        throw NotAllowedException();
+      }
+    } catch (err) {
+      if (err is NotAllowedException) {
+        print('[RPG LAND] Not Authorized: $name | $phone');
+        message.reply(i18n.commands.commons.notAuthorized);
+      } else {
+        print(err);
+        message.reply(i18n.commands.commons.somethingWrong);
+      }
+
+      rethrow;
+    }
+  }
 
   Command? findCommand(String commandLine, CommandTranslations i18n) {
     try {
@@ -184,7 +185,7 @@ class HandleMessages {
         return;
       }
 
-      // await validateWhitelist(i18n);
+      await validateWhitelist(i18n);
 
       final commandLine = message.body.split(commandChar)[1];
       final command = findCommand(commandLine, i18n);

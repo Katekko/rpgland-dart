@@ -1,0 +1,1 @@
+class BotInMaintenanceException implements Exception {}

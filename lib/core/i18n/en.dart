@@ -76,7 +76,7 @@ class TranslationEn extends CommandTranslations {
       somethingWrong: '❌❌❌ Something went wrong, please contact Katekko ❌❌❌',
       waitMessage: '⏳ Please wait a moment before sending another message.',
       notAuthorized:
-          '❌ You are not authorized to use this bot. ❌\nContact the administrator for access.\n*Katekko#1429* ',
+          '❌ You are not authorized to use this bot. ❌\nContact the administrator for access.\n*Katekko* ',
       botMaintenance:
           '🛠️ The bot is currently undergoing maintenance. 🛠️\nPlease try again later.',
       commandOnlyForPrivate:

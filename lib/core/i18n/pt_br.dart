@@ -76,7 +76,7 @@ class TranslationPtBr extends CommandTranslations {
           '❌❌❌ Algo está errado, entre em contato com a Katekko ❌❌❌',
       waitMessage: '⏳ Aguarde um momento antes de enviar outra mensagem.',
       notAuthorized:
-          '❌ Você não está autorizado a usar este bot. ❌\nEntre em contato com o administrador para obter acesso.\n*Katekko#1429* ',
+          '❌ Você não está autorizado a usar este bot. ❌\nEntre em contato com o administrador para obter acesso.\n*Katekko* ',
       botMaintenance:
           '🛠️ O bot está passando por manutenção no momento. 🛠️\nTente novamente mais tarde.',
       commandOnlyForPrivate:
