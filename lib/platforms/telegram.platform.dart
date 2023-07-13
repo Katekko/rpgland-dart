@@ -14,9 +14,25 @@ import '../dotenv.dart';
 import 'base_platform.dart';
 
 class TelegramPlatform extends BasePlatform {
+  static CustomMessage messageToCustom(TeleDartMessage msg) {
+    final callbacks = {'reply': (message) => msg.reply(message)};
+
+    final customMessage = CustomMessage(
+      body: msg.text ?? '',
+      telegramId: msg.from?.id.toString(),
+      timestamp: msg.date,
+      isGroup: msg.chat.type == Chat.typeGroup,
+      name: msg.chat.firstName ?? '',
+      phone: msg.contact?.phoneNumber.replaceAll('+', ''),
+      callbacks: callbacks,
+    );
+
+    return customMessage;
+  }
+
   void handleMessages(TeleDartMessage msg) async {
     final playersService = Injector.find<PlayersService>();
-    final customMessage = CustomMessage.fromTelegramMessage(msg);
+    final customMessage = TelegramPlatform.messageToCustom(msg);
 
     final handler = HandleMessages(
       message: customMessage,
@@ -43,7 +59,7 @@ class TelegramPlatform extends BasePlatform {
 
     teledart.onCommand('start').listen((msg) async {
       final playersService = Injector.find<PlayersService>();
-      final customMessage = CustomMessage.fromTelegramMessage(msg);
+      final customMessage = TelegramPlatform.messageToCustom(msg);
       final player = await playersService.getPlayerByMessage(customMessage);
       final language = await defineLanguage(player, customMessage);
 
@@ -68,7 +84,7 @@ class TelegramPlatform extends BasePlatform {
 
     teledart.onMessage().listen((msg) async {
       final playersService = Injector.find<PlayersService>();
-      final customMessage = CustomMessage.fromTelegramMessage(msg);
+      final customMessage = TelegramPlatform.messageToCustom(msg);
       final player = await playersService.getPlayerByMessage(customMessage);
       final language = await defineLanguage(player, customMessage);
 

@@ -9,8 +9,44 @@ import '../handle_messages.dart';
 import 'base_platform.dart';
 
 class WppPlatform extends BasePlatform {
+  static CustomMessage messageToCustom({
+    required WhatsAppMessage message,
+    required SimpleWhatsAppClient client,
+  }) {
+    void reply(msg) => client.chat.sendReplyTextMessage(
+          message: msg,
+          messageToReply: message,
+        );
+
+    void sendMessage(msg) => client.chat.sendTextMessage(
+          chatId: message.chatId,
+          message: msg,
+        );
+
+    void setTitle(msg) => client.group.setGroupTitle(
+          chatId: message.chatId,
+          title: msg,
+        );
+
+    final callbacks = {
+      'reply': reply,
+      'sendMessage': sendMessage,
+      'setTitle': setTitle
+    };
+
+    final customMessage = CustomMessage(
+      timestamp: message.timestamp,
+      body: message.body,
+      name: message.owner.name,
+      isGroup: message.isFromGroup,
+      callbacks: callbacks,
+    );
+
+    return customMessage;
+  }
+
   void handleMessages(WhatsAppMessage msg, SimpleWhatsAppClient client) async {
-    final customMessage = CustomMessage.fromWhatsappMessage(
+    final customMessage = WppPlatform.messageToCustom(
       message: msg,
       client: client,
     );
