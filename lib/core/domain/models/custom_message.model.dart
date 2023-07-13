@@ -6,25 +6,28 @@ class CustomMessage {
 
   String name;
   String body;
-  void Function(String message) reply;
-  void Function(String message) sendMessage;
   bool isGroup;
 
   String? phone;
   String? telegramId;
 
+  String? groupTitle;
+
+  Map<String, void Function(dynamic)> callbacks;
+
   CustomMessage({
     required this.timestamp,
     required this.body,
-    required this.reply,
     required this.name,
     required this.isGroup,
-    required this.sendMessage,
+    required this.callbacks,
     this.telegramId,
     this.phone,
   });
 
   factory CustomMessage.fromTelegramMessage(TeleDartMessage msg) {
+    final callbacks = {'reply': (message) => msg.reply(message)};
+
     final customMessage = CustomMessage(
       body: msg.text ?? '',
       telegramId: msg.from?.id.toString(),
@@ -32,8 +35,7 @@ class CustomMessage {
       isGroup: msg.chat.type == Chat.typeGroup,
       name: msg.chat.firstName ?? '',
       phone: msg.contact?.phoneNumber.replaceAll('+', ''),
-      reply: msg.reply,
-      sendMessage: (msg) {},
+      callbacks: callbacks,
     );
 
     return customMessage;
@@ -43,19 +45,33 @@ class CustomMessage {
     required WhatsAppMessage message,
     required SimpleWhatsAppClient client,
   }) {
+    void reply(msg) => client.chat.sendReplyTextMessage(
+          message: msg,
+          messageToReply: message,
+        );
+
+    void sendMessage(msg) => client.chat.sendTextMessage(
+          chatId: message.chatId,
+          message: msg,
+        );
+
+    void setTitle(msg) => client.group.setGroupTitle(
+          chatId: message.chatId,
+          title: msg,
+        );
+
+    final callbacks = {
+      'reply': reply,
+      'sendMessage': sendMessage,
+      'setTitle': setTitle
+    };
+
     final customMessage = CustomMessage(
       timestamp: message.timestamp,
       body: message.body,
       name: message.owner.name,
       isGroup: message.isFromGroup,
-      reply: (msg) => client.chat.sendReplyTextMessage(
-        message: msg,
-        messageToReply: message,
-      ),
-      sendMessage: (msg) => client.chat.sendTextMessage(
-        chatId: message.chatId,
-        message: msg,
-      ),
+      callbacks: callbacks,
     );
 
     return customMessage;

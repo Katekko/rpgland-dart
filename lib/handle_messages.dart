@@ -80,10 +80,10 @@ class HandleMessages {
     } catch (err) {
       if (err is NotAllowedException) {
         print('[RPG LAND] Not Authorized: $name | $phone');
-        message.reply(i18n.commands.commons.notAuthorized);
+        message.callbacks['reply']?.call(i18n.commands.commons.notAuthorized);
       } else {
         print(err);
-        message.reply(i18n.commands.commons.somethingWrong);
+        message.callbacks['reply']?.call(i18n.commands.commons.somethingWrong);
       }
 
       rethrow;
@@ -95,7 +95,7 @@ class HandleMessages {
       final List<String> commandParts = commandLine.split(' ');
       return _traverseCommands(commands, commandParts, i18n);
     } catch (error) {
-      message.reply(i18n.commands.commons.commandNotFound);
+      message.callbacks['reply']?.call(i18n.commands.commons.commandNotFound);
       return null;
     }
   }
@@ -109,7 +109,7 @@ class HandleMessages {
       if (commands is Command Function()) {
         return commands();
       } else {
-        message.reply(i18n.commands.commons.commandNotFound);
+        message.callbacks['reply']?.call(i18n.commands.commons.commandNotFound);
         return null;
       }
     }
@@ -121,7 +121,7 @@ class HandleMessages {
       final nestedCommand = commands[commandPart];
       return _traverseCommands(nestedCommand, remainingCommandParts, i18n);
     } else {
-      message.reply(i18n.commands.commons.commandNotFound);
+      message.callbacks['reply']?.call(i18n.commands.commons.commandNotFound);
       return null;
     }
   }
@@ -149,7 +149,8 @@ class HandleMessages {
     if (message.isGroup) {
       final commandType = command.runtimeType;
       if (privateCommands.contains(commandType)) {
-        message.reply(i18n.commands.commons.commandOnlyForPrivate);
+        message.callbacks['reply']
+            ?.call(i18n.commands.commons.commandOnlyForPrivate);
         return true;
       }
     }
@@ -164,7 +165,7 @@ class HandleMessages {
   ) {
     final commandType = command.runtimeType;
     if (needToStartCommands.contains(commandType) && player == null) {
-      message.reply(i18n.commands.commons.needToStart);
+      message.callbacks['reply']?.call(i18n.commands.commons.needToStart);
       return true;
     }
 
@@ -181,7 +182,7 @@ class HandleMessages {
       final currentTime = DateTime.now().millisecondsSinceEpoch;
       final isFlood = verifyIfIsFlood(currentTime, 1000);
       if (isFlood) {
-        message.reply(i18n.commands.commons.waitMessage);
+        message.callbacks['reply']?.call(i18n.commands.commons.waitMessage);
         return;
       }
 

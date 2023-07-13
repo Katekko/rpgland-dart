@@ -16,7 +16,7 @@ class HelpCommand extends Command {
   @override
   Future<void> execute(CustomMessage message, dynamic args) async {
     try {
-      message.reply(
+      message.callbacks['reply']?.call(
         '${i18n.commands.help.title}\n\n${i18n.commands.help.start}\n\n${i18n.commands.help.hunt}\n\n${i18n.commands.help.heal}\n\n${i18n.commands.help.shop}\n\n${i18n.commands.help.profile}\n\n${i18n.commands.help.equip}\n\n${i18n.commands.help.ranking}\n\n${i18n.commands.help.language}',
       );
     } catch (err) {

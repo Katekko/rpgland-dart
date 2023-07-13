@@ -18,9 +18,9 @@ class PingCommand extends Command {
   @override
   Future<void> execute(CustomMessage message, dynamic args) async {
     if (message.name.toLowerCase() != 'katekko') {
-      message.reply('PONG PONG NO JHOZIAS');
+      message.callbacks['reply']?.call('PONG PONG NO JHOZIAS');
     } else {
-      message.reply('PONG PONG NO KATEKKO');
+      message.callbacks['reply']?.call('PONG PONG NO KATEKKO');
     }
   }
 }

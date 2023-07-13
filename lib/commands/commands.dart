@@ -1,4 +1,7 @@
+import 'package:rpgland/commands/common/the_hallowin/set_title_off.command.dart';
+
 import 'common/both/ping.command.dart';
+import 'common/the_hallowin/set_title_on.command.dart';
 import 'rpg/both/help.command.dart';
 import 'rpg/both/profile.command.dart';
 import 'rpg/private/start.command.dart';
@@ -24,6 +27,9 @@ final commands = <String, dynamic>{
   // 'admin migrate players': MigratePlayersCommand(),
   // 'language': ChangeLanguageCommand(),
   // 'equip': EquipItemCommand(),
+  // THE HALLOWIN
+  'on': () => SetTitleOnCommand(),
+  'off': () => SetTitleOffCommand(),
 };
 
 typedef PrivateCommandTypes = List<Type>;

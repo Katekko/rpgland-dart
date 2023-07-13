@@ -31,14 +31,16 @@ class StartCommand extends Command {
               message.telegramId,
             );
             await playersService.savePlayer(player);
-            message.reply(i18n.commands.start.welcome(player.name));
+            message.callbacks['reply']
+                ?.call(i18n.commands.start.welcome(player.name));
           } else {
-            message.reply(i18n.commands.start.playerAlreadyStarted);
+            message.callbacks['reply']
+                ?.call(i18n.commands.start.playerAlreadyStarted);
           }
         }
       } catch (err) {
         print('Error adding player: $err');
-        message.reply(i18n.commands.start.error);
+        message.callbacks['reply']?.call(i18n.commands.start.error);
       }
     } catch (err) {
       rethrow;

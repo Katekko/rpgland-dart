@@ -1,27 +1,22 @@
+import 'package:rpgland/core/domain/models/player.model.dart';
+
 import '../../../core/domain/abstractions/commands/command.dart';
+import '../../../core/domain/abstractions/service/service.dart';
 import '../../../core/domain/models/custom_message.model.dart';
-import '../../../core/domain/models/player.model.dart';
 import '../../../core/i18n/translation.dart';
 
-class ProfileCommand extends Command {
-  PlayerModel? player;
-
+class SetTitleOnCommand extends Command {
   @override
   void injectDependencies(
     CommandTranslations i18n,
     PlayerModel? player,
-    Map<String, dynamic> services,
+    Map<String, Service> services,
   ) {
     this.i18n = i18n;
-    this.player = player;
   }
 
   @override
   Future<void> execute(CustomMessage message, dynamic args) async {
-    try {
-      message.callbacks['reply']?.call(i18n.commands.profile.info(player!));
-    } catch (err) {
-      rethrow;
-    }
+    message.callbacks['setTitle']?.call('ON 🟢 | The HalloweeN');
   }
 }
