@@ -185,7 +185,8 @@ class HandleMessages {
         return;
       }
 
-      await validateWhitelist(i18n);
+      // TODO: Make whitelists for groups and single persons
+      // await validateWhitelist(i18n);
 
       final commandLine = message.body.split(commandChar)[1];
       final command = findCommand(commandLine, i18n);
